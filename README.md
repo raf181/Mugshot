@@ -1,1 +1,2 @@
-# Mugshot
+> [!warning]
+>As the developer of this tool, I provide it "as-is" without any warranties or guarantees of any kind. My responsibility extends only to the development  of the software. I do not assume any liability for how the tool is used, including any potential legal, ethical, or privacy issues arising from its usage.
