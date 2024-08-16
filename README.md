@@ -9,7 +9,7 @@ Now that we have gotten all the _"legal"_ talk out of  the way, these project wa
 These is an idea for now is to make it _"modular"_ in how data is feed into it, so that custom data collectors can be build and runed separately form the server and having optional features
 
 I'm thinking on having these process for now:
-- Get pictures from a **_worker$^{[1]}$_** all the pictures in a local folder
+- Get pictures from a **_worker_** $^{[1]}$ all the pictures in a local folder
 - Retrieve the faces included in any picture and set change them to black and white
 - Calculate the embeddings from the faces
 - Store the embeddings in PostgreSQL in a `vector` column from `pgvector`
