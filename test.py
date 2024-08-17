@@ -4,6 +4,7 @@ import sqlite3
 import os
 import json
 import numpy as np
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 # 1. Face Detection and Embedding Function
 def detect_faces_and_embeddings(image_path):
@@ -20,10 +21,10 @@ def detect_faces_and_embeddings(image_path):
         face_encodings = face_recognition.face_encodings(rgb_image, face_locations)
         
         print(f"Found {len(face_locations)} face(s) in {image_path}")  # Debugging output
-        return face_locations, face_encodings
+        return image_path, face_locations, face_encodings
     except Exception as e:
         print(f"Error processing {image_path}: {str(e)}")
-        return [], []
+        return image_path, [], []
 
 # 2. Database Setup Function
 def setup_database():
@@ -90,12 +91,26 @@ def save_faces_to_db(image_path, face_locations, face_encodings, conn):
     conn.commit()
     print(f"Saved {len(face_locations)} face(s) from {image_path} to the database.")  # Debugging output
 
-# 5. Process Multiple Images Function
-def process_images(directory_path, conn):
-    for filename in os.listdir(directory_path):
-        if filename.lower().endswith(('.jpg', '.jpeg', '.png')):
-            image_path = os.path.join(directory_path, filename)
-            face_locations, face_encodings = detect_faces_and_embeddings(image_path)
+# 5. Process Images in Directories and Subdirectories with Multicore Function
+def process_images_multicore(directory_path, conn):
+    # Collect all image paths
+    image_paths = []
+    for root, _, files in os.walk(directory_path):
+        for filename in files:
+            if filename.lower().endswith(('.jpg', '.jpeg', '.png')):
+                image_paths.append(os.path.join(root, filename))
+    
+    # Check if images were found
+    if not image_paths:
+        print(f"No images found in directory {directory_path} or its subdirectories.")
+        return
+    
+    # Use ProcessPoolExecutor to process images in parallel
+    with ProcessPoolExecutor() as executor:
+        futures = {executor.submit(detect_faces_and_embeddings, image_path): image_path for image_path in image_paths}
+        
+        for future in as_completed(futures):
+            image_path, face_locations, face_encodings = future.result()
             if face_locations:
                 save_faces_to_db(image_path, face_locations, face_encodings, conn)
             else:
@@ -118,8 +133,8 @@ if __name__ == "__main__":
     # Path to the directory containing images
     directory_path = 'img'
     
-    # Process images in the directory and save detected faces to the database
-    process_images(directory_path, conn)
+    # Process images in the directory and subdirectories, save detected faces to the database
+    process_images_multicore(directory_path, conn)
     
     # Example: Query images by a specific face ID
     cursor = conn.cursor()
