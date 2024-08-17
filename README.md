@@ -16,6 +16,33 @@ I'm thinking on having these process for now:
 - Use `pgvector` distance function to retrieve the closest faces and therefore photos from people that look a like
 - Having a validation process were Images are manually verified to get a more accurate profile for a specific individual of interest 
 
+## Working Features
+
+- Scans images in a specified directory and all subdirectories.
+- Detects faces and generates a unique ID for each face.
+- Saves face encodings, face locations, and image paths to an SQLite database.
+- Multicore processing for faster image scanning.
+- Allows querying of images based on face ID.
+
+## Requirements
+
+- Python 3.6 or later
+- OpenCV
+- face_recognition
+- numpy
+- sqlite3 (built-in with Python)
+
+## Installation
+
+1. Clone the repository or download the script files.
+
+2. Navigate to the project directory.
+
+3. Install the required Python packages:
+
+```bash
+pip install -r requirements.txt
+
 
 
 ---
